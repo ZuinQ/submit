@@ -11,8 +11,8 @@
 # CONFIG
 # =======================
 APP_USER="$USER"
-CODE_REPO="/home/$APP_USER/devopscode"        # Repo code
-SUBMIT_REPO="/home/$APP_USER/devopssubmit"    # Repo submit
+CODE_REPO="/home/$APP_USER/code"        # Repo code
+SUBMIT_REPO="/home/$APP_USER/submit"    # Repo submit
 SRC_DIR="$CODE_REPO/src"                       # Source code thực tế
 LOG_FILE="/tmp/setup-$(date +%Y%m%d-%H%M%S).log"
 
