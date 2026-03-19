@@ -1,0 +1,64 @@
+# ============================================
+# 🐳 DOCKER COMPOSE - PHASE 3
+# ============================================
+version: '3.8'
+
+services:
+  # MongoDB Container
+  mongodb:
+    image: mongo:6.0
+    container_name: devops-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - ${MONGO_VOLUME:-mongodb_data}:/data/db
+    networks:
+      - app-network
+    healthcheck:
+      test: |
+        mongosh --eval "db.runCommand('ping').ok" 
+        --username ${MONGO_INITDB_ROOT_USERNAME} 
+        --password ${MONGO_INITDB_ROOT_PASSWORD} 
+        --authenticationDatabase admin
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # Web Application Container
+  web:
+    # Sử dụng image từ Docker Hub (đã build và push)
+    image: ${IMAGE_NAME:-yourusername/devops-app}:${IMAGE_TAG:-latest}
+    container_name: devops-web
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      - MONGO_URI=${MONGO_URI}
+      - UPLOAD_PATH=${UPLOAD_PATH}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE}
+    volumes:
+      - ${UPLOADS_VOLUME:-uploads}:/app/public/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
+
+# Volumes cho persistent data
+volumes:
+  mongodb_data:
+    name: ${MONGO_VOLUME:-mongodb_data}
+  uploads:
+    name: ${UPLOADS_VOLUME:-uploads}
+
+# Network riêng cho các container
+networks:
+  app-network:
+    name: devops-app-network
+    driver: bridge
