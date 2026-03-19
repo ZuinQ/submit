@@ -39,7 +39,7 @@ check_system() {
         exit 1
     fi
 
-    if ! ping -c 1 google.com &>/dev/null; then
+    if ! curl -s hhtp://google.com &>/dev/null; then
         print_error "No internet connection"
         exit 1
     fi
